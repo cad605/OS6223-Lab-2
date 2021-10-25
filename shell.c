@@ -66,22 +66,16 @@ void runcmd(struct cmd *cmd) {
   case '>':
   case '<':
     rcmd = (struct redircmd *)cmd;
-    if (rcmd->type == '>') {
-      dup2(1, rcmd->fd);
-      close(rcmd->fd);
-    }
+    int newfd;
 
-    if (rcmd->type == '<') {
-      int in = 0;
-      if ((in = open(rcmd->file, rcmd->mode)) < 0) {
+    if (rcmd->type == '>') {
+      if ((newfd = open(rcmd->file, O_CREAT, rcmd->mode)) < 0) {
         fprintf(stderr, "open %s failed\n", rcmd->file);
         exit(0);
       }
-      dup2(rcmd->fd, in);
-      close(rcmd->fd);
+      dup2(newfd, rcmd->fd);
+      runcmd(rcmd->cmd);
     }
-
-    runcmd(rcmd->cmd);
     break;
 
   case '|':
