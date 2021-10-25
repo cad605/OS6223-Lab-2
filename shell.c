@@ -97,7 +97,12 @@ void runcmd(struct cmd *cmd) {
     int pipefd[2];
     int pid;
 
-    pipe(pipefd);
+    if(pipe(pipefd) == -1){
+    perror("pipe");
+    exit(EXIT_FAILURE);
+  }
+    
+    
     pid = fork();
     if (pid == -1) {
       fprintf(stderr, "Error forking process.\n");
