@@ -92,8 +92,21 @@ void runcmd(struct cmd *cmd) {
 
   case '|':
     pcmd = (struct pipecmd *)cmd;
-    fprintf(stderr, "pipe not implemented\n");
-    // Your code here ...
+    int pipefd[2];
+    int pid;
+
+    pipe(pipefd);
+    pid = fork();
+    if (pid == 0) {
+      dup2(pipefd[0], rcmd->fd);
+
+      close(pipefd[1]);
+      runcmd(rcmd->cmd);
+    } else {
+      dup2(pipefd[1], rcmd->fd);
+      close(pipefd[0]);
+    }
+    runcmd(rcmd->cmd);
     break;
   }
   exit(0);
