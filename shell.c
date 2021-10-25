@@ -77,7 +77,7 @@ void runcmd(struct cmd *cmd) {
 
     runcmd(rcmd->cmd);
     break;
-    
+
   case '<':
     rcmd = (struct redircmd *)cmd;
 
@@ -97,12 +97,11 @@ void runcmd(struct cmd *cmd) {
     int pipefd[2];
     int pid;
 
-    if(pipe(pipefd) == -1){
-    perror("pipe");
-    exit(EXIT_FAILURE);
-  }
-    
-    
+    if (pipe(pipefd) == -1) {
+      fprintf(stderr, "Error creating pipe.\n");
+      exit(0);
+    }
+
     pid = fork();
     if (pid == -1) {
       fprintf(stderr, "Error forking process.\n");
@@ -110,12 +109,12 @@ void runcmd(struct cmd *cmd) {
     }
 
     if (pid == 0) {
-      dup2(pipefd[0], rcmd->fd);
-      close(pipefd[1]);
+      dup2(pipefd[1], 1);
+      close(pipefd[0]);
       runcmd(pcmd->left);
     } else {
-      dup2(pipefd[1], rcmd->fd);
-      close(pipefd[0]);
+      dup2(pipefd[0], 0);
+      close(pipefd[1]);
       runcmd(pcmd->right);
     }
     break;
