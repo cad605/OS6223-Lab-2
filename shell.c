@@ -69,13 +69,13 @@ void runcmd(struct cmd *cmd) {
     int newfd;
 
     if (rcmd->type == '>') {
-      if ((newfd = open(rcmd->file, O_CREAT, rcmd->mode)) < 0) {
+      if ((newfd = open(rcmd->file, O_CREAT, 0644)) < 0) {
         fprintf(stderr, "open %s failed\n", rcmd->file);
         exit(0);
       }
       dup2(newfd, rcmd->fd);
-      runcmd(rcmd->cmd);
     }
+    runcmd(rcmd->cmd);
     break;
 
   case '|':
