@@ -77,7 +77,7 @@ void runcmd(struct cmd *cmd) {
         fprintf(stderr, "open %s failed\n", rcmd->file);
         exit(0);
       }
-      dup2(in, rcmd->fd);
+      dup2(rcmd->fd, in);
       close(rcmd->fd);
     }
 
