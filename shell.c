@@ -43,6 +43,7 @@ struct cmd *parsecmd(char *);
 // Execute cmd.  Never returns.
 void runcmd(struct cmd *cmd) {
   int p[2], r;
+  int newfd, in, out;
   struct execcmd *ecmd;
   struct pipecmd *pcmd;
   struct redircmd *rcmd;
@@ -65,10 +66,7 @@ void runcmd(struct cmd *cmd) {
 
   case '>':
     rcmd = (struct redircmd *)cmd;
-    int newfd, out;
-
-    out = open(rcmd->file, O_WRONLY | O_TRUNC | O_CREAT,
-               S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    out = open(rcmd->file, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
     if (out < 0) {
       fprintf(stderr, "Error opening output file\n");
       exit(1);
@@ -80,28 +78,14 @@ void runcmd(struct cmd *cmd) {
     break;
   case '<':
     rcmd = (struct redircmd *)cmd;
-    int newfd, in, out;
 
-    if (rcmd->type == '>') {
-      out = open(rcmd->file, O_WRONLY | O_TRUNC | O_CREAT,
-                 S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-      if (out < 0) {
-        fprintf(stderr, "Error opening output file\n");
-        exit(1);
-      }
-      dup2(out, rcmd->fd);
-      close(out);
+    in = open(rcmd->file, rcmd->mode);
+    if (in < 0) {
+      fprintf(stderr, "Error opening input file\n");
+      exit(1);
     }
-
-    if (rcmd->type == '<') {
-      in = open(rcmd->file, rcmd->mode);
-      if (in < 0) {
-        fprintf(stderr, "Error opening input file\n");
-        exit(1);
-      }
-      dup2(in, rcmd->fd);
-      close(in);
-    }
+    dup2(in, rcmd->fd);
+    close(in);
 
     runcmd(rcmd->cmd);
     break;
