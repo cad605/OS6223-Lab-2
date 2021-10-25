@@ -67,6 +67,7 @@ void runcmd(struct cmd *cmd) {
   case '<':
     rcmd = (struct redircmd *)cmd;
     if (rcmd->type == '>') {
+    fprintf(stderr, "open descriptor, %d,  failed\n", rcmd->fd);
       dup2(rcmd->fd, 1);
       close(rcmd->fd);
     }
