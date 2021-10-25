@@ -66,7 +66,8 @@ void runcmd(struct cmd *cmd) {
 
   case '>':
     rcmd = (struct redircmd *)cmd;
-    out = open(rcmd->file, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    out = open(rcmd->file, O_WRONLY | O_TRUNC | O_CREAT,
+               S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
     if (out < 0) {
       fprintf(stderr, "Error opening output file\n");
       exit(1);
@@ -76,6 +77,7 @@ void runcmd(struct cmd *cmd) {
 
     runcmd(rcmd->cmd);
     break;
+    
   case '<':
     rcmd = (struct redircmd *)cmd;
 
@@ -97,6 +99,11 @@ void runcmd(struct cmd *cmd) {
 
     pipe(pipefd);
     pid = fork();
+    if (pid == -1) {
+      fprintf(stderr, "Error forking process.\n");
+      exit(0);
+    }
+
     if (pid == 0) {
       dup2(pipefd[0], rcmd->fd);
       close(pipefd[1]);
