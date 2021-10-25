@@ -99,14 +99,13 @@ void runcmd(struct cmd *cmd) {
     pid = fork();
     if (pid == 0) {
       dup2(pipefd[0], rcmd->fd);
-
       close(pipefd[1]);
-      runcmd(rcmd->cmd);
+      runcmd(pcmd->left);
     } else {
       dup2(pipefd[1], rcmd->fd);
       close(pipefd[0]);
+      runcmd(pcmd->right);
     }
-    runcmd(rcmd->cmd);
     break;
   }
   exit(0);
